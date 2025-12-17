@@ -1,0 +1,42 @@
+:root {
+   --color-primary: #198754;
+   --color-danger: #dc3545;
+   --color-info: #0dcaf0;
+   --color-warning: #ffc107;
+   --color-bg: #f8f9fa;
+}
+
+body {
+   background-color: var(--color-bg);
+}
+
+.card {
+   border-radius: 12px;
+   transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.card:hover {
+   transform: translateY(-3px);
+   box-shadow: 0 8px 18px rgba(0, 0, 0, .08);
+}
+
+.card-title {
+   font-size: .95rem;
+   font-weight: 600;
+}
+
+.offcanvas {
+   width: 260px;
+}
+
+.nav-pills .nav-link {
+   border-radius: 8px;
+}
+
+.nav-pills .nav-link:hover {
+   background-color: #f1f3f5;
+}
+
+.btn-group .btn.active {
+   color: #fff;
+}
