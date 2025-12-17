@@ -1,91 +1,85 @@
 <?php
 require __DIR__ . '/../bootstrap.php';
 
-$route = trim($_GET['route'] ?? 'login');
+$route = $_GET['route'] ?? 'home';
 
 /**
- * ACTIONS (EXECUTAM ANTES DE QUALQUER HTML)
+ * Rotas privadas
  */
-$actionRoutes = [
-   'process_login',
-   'process_goal',
-   'process_transaction',
-   'delete_transaction',
-   'export_csv',
-   'export_pdf'
+$privateRoutes = [
+   'home',
+   'transactions',
+   'edit_transaction_view',
+   'goals'
 ];
 
-if (in_array($route, $actionRoutes, true)) {
-   require __DIR__ . '/../app/Actions/' . $route . '.php';
-   exit; // <<< ESSENCIAL
+/**
+ * Valida login ANTES de carregar qualquer view
+ */
+if (in_array($route, $privateRoutes, true)) {
+   requireLogin();
 }
-?>
-<!DOCTYPE html>
-<html lang="pt-br">
 
-<head>
-   <meta charset="UTF-8">
+/**
+ * Roteamento
+ */
+switch ($route) {
+   case 'home':
+      require __DIR__ . '/../app/Views/index.php';
+      break;
 
-   <!-- OPEN GRAPH -->
-   <meta property="og:title" content="Minhas Finanças">
-   <meta property="og:description" content="Controle suas finanças com facilidade e eficiência.">
-   <meta property="og:image"
-      content="https://labmakerifes.com/minhas-financas/public/assets/img/logo_financas.png">
-   <meta property="og:type" content="website">
+   case 'login':
+      require __DIR__ . '/../app/Views/login.php';
+      break;
 
-   <meta name="viewport" content="width=device-width, initial-scale=1">
-   <title>Minhas Finanças</title>
-</head>
+   case 'register':
+      require __DIR__ . '/../app/Views/register.php';
+      break;
 
-<body>
-   <?php
+   case 'logout':
+      require __DIR__ . '/../app/Views/logout.php';
+      break;
+
+   case 'transactions':
+      require __DIR__ . '/../app/Views/transactions.php';
+      break;
+
+   case 'edit_transaction_view':
+      require __DIR__ . '/../app/Views/edit_transaction.php';
+      break;
+
+   case 'goals':
+      require __DIR__ . '/../app/Views/goals.php';
+      break;
 
    /**
-    * ROTAS PRIVADAS
+    * Actions
     */
-   $privateRoutes = ['home', 'transactions', 'edit_transaction_view', 'goals'];
+   case 'process_login':
+      require __DIR__ . '/../app/Actions/process_login.php';
+      break;
 
-   if (in_array($route, $privateRoutes, true)) {
-      requireLogin();
-   }
+   case 'process_goal':
+      require __DIR__ . '/../app/Actions/process_goal.php';
+      break;
 
-   /**
-    * VIEWS
-    */
-   switch ($route) {
-      case 'home':
-         require __DIR__ . '/../app/Views/index.php';
-         break;
+   case 'process_transaction':
+      require __DIR__ . '/../app/Actions/process_transaction.php';
+      break;
 
-      case 'login':
-         require __DIR__ . '/../app/Views/login.php';
-         break;
+   case 'delete_transaction':
+      require __DIR__ . '/../app/Actions/delete_transaction.php';
+      break;
 
-      case 'register':
-         require __DIR__ . '/../app/Views/register.php';
-         break;
+   case 'export_csv':
+      require __DIR__ . '/../app/Actions/export_csv.php';
+      break;
 
-      case 'logout':
-         require __DIR__ . '/../app/Views/logout.php';
-         break;
+   case 'export_pdf':
+      require __DIR__ . '/../app/Actions/export_pdf.php';
+      break;
 
-      case 'transactions':
-         require __DIR__ . '/../app/Views/transactions.php';
-         break;
-
-      case 'edit_transaction_view':
-         require __DIR__ . '/../app/Views/edit_transaction.php';
-         break;
-
-      case 'goals':
-         require __DIR__ . '/../app/Views/goals.php';
-         break;
-
-      default:
-         http_response_code(404);
-         echo 'Página não encontrada';
-   }
-   ?>
-</body>
-
-</html>
+   default:
+      http_response_code(404);
+      echo 'Página não encontrada';
+}
