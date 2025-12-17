@@ -3,11 +3,6 @@
 
 <head>
    <meta charset="utf-8">
-   <meta property="og:title" content="Minhas Finanças" />
-   <meta property="og:description" content="Controle suas finanças com facilidade e eficiência." />
-   <meta property="og:image" content="https://labmakerifes.com/minhas-financas/public/assets/img/logo_financas.png" />
-   <meta property="og:url" content="https://labmakerifes.com/minhas-financas/public/index.php?route=login" />
-   <meta property="og:type" content="website" />
    <meta name="viewport" content="width=device-width,initial-scale=1">
    <title>Minhas Finanças</title>
 
