@@ -59,6 +59,10 @@ switch ($route) {
       require __DIR__ . '/../app/Actions/process_login.php';
       break;
 
+   case 'process_register':
+      require __DIR__ . '/../app/Actions/process_register.php';
+      break;
+
    case 'process_goal':
       require __DIR__ . '/../app/Actions/process_goal.php';
       break;
