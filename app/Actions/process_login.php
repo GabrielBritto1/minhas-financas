@@ -12,7 +12,7 @@ if ($user && password_verify($password, $user['password'])) {
    $_SESSION['user_id'] = $user['id'];
    $_SESSION['user_name'] = $user['name'] ?? 'Usuário';
 
-   header('Location: index.php');
+   header('Location: index.php?route=home');
    exit;
 }
 
