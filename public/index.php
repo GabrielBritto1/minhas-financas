@@ -52,6 +52,10 @@ switch ($route) {
       require __DIR__ . '/../app/Views/goals.php';
       break;
 
+   case 'installments':
+      require __DIR__ . '/../app/Views/installments.php';
+      break;
+
    /**
     * Actions
     */
@@ -73,6 +77,10 @@ switch ($route) {
 
    case 'delete_transaction':
       require __DIR__ . '/../app/Actions/delete_transaction.php';
+      break;
+
+   case 'pay_installment':
+      require __DIR__ . '/../app/Actions/pay_installment.php';
       break;
 
    case 'export_csv':
