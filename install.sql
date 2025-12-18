@@ -35,7 +35,30 @@ CREATE TABLE goals (
   month CHAR(7) NOT NULL
 );
 
+CREATE TABLE installments (
+   id INT AUTO_INCREMENT PRIMARY KEY,
+   user_id INT NOT NULL,
+   transaction_id INT NOT NULL,
+   description VARCHAR(255),
+   installment_number INT NOT NULL,
+   total_installments INT NOT NULL,
+   amount DECIMAL(10,2) NOT NULL,
+   paid TINYINT(1) DEFAULT 0,
+   paid_at DATE NULL,
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+   FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
+);
+
 ALTER TABLE transactions ADD COLUMN goal_id INT NULL;
+
+ALTER TABLE transactions
+ADD COLUMN expense_kind ENUM('fixo','variavel') NULL AFTER type,
+ADD COLUMN payment_method ENUM('dinheiro','pix','debito','credito','transferencia') NULL AFTER expense_kind;
+
+ALTER TABLE transactions
+ADD COLUMN installments INT NULL AFTER payment_method,
+ADD COLUMN installment_value DECIMAL(10,2) NULL AFTER installments;
 
 INSERT INTO categories (name) VALUES
 ('Alimentação'),('Transporte'),('Moradia'),('Lazer'),('Salário'),('Investimentos'),('Outros');

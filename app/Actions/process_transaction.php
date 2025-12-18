@@ -11,7 +11,9 @@ $uid = currentUserId();
 /* FUNÇÃO PARA NORMALIZAR MOEDA */
 function normalizeMoney($value)
 {
-   $value = trim($value);
+   if ($value === null || $value === '') {
+      return null;
+   }
    $value = str_replace('.', '', $value);   // remove milhar
    $value = str_replace(',', '.', $value);  // vírgula → ponto
    return $value;
@@ -23,12 +25,16 @@ $date        = $_POST['date'] ?? null;
 $description = $_POST['description'] ?? null;
 $type        = $_POST['type'] ?? null;
 $category    = $_POST['category'] ?? null;
+$expenseKind   = $_POST['expense_kind'] ?? null;
+$paymentMethod = $_POST['payment_method'] ?? null;
+$installments      = $_POST['installments'] ?? null;
+$installmentValue  = normalizeMoney($_POST['installment_value'] ?? null);
 
 if (empty($category) && !empty($_POST['category_select'])) {
    $category = $_POST['category_select'];
 }
 
-$amount = normalizeMoney($_POST['amount'] ?? 0);
+$amount = normalizeMoney($_POST['amount'] ?? null);
 
 if (!$date || !$type || !$amount) {
    die('Dados inválidos');
@@ -57,7 +63,9 @@ if ($id) {
    $stmt = $pdo->prepare("
       UPDATE transactions
       SET date=:date, description=:desc, type=:type,
-          category=:cat, amount=:amount, goal_id=:goal_id
+          category=:cat, amount=:amount, goal_id=:goal_id,
+          expense_kind=:expense_kind, payment_method=:payment_method,
+          installments=:installments, installment_value=:installment_value
       WHERE id=:id AND user_id=:uid
    ");
 
@@ -69,26 +77,82 @@ if ($id) {
       ':amount'  => $amount,
       ':goal_id' => $goalId ?: null,
       ':id'      => $id,
-      ':uid'     => $uid
-   ]);
-}
-/* INSERT */ else {
-   $stmt = $pdo->prepare("
-      INSERT INTO transactions
-      (user_id, date, description, type, category, amount, goal_id)
-      VALUES
-      (:uid, :date, :desc, :type, :cat, :amount, :goal_id)
-   ");
-
-   $stmt->execute([
       ':uid'     => $uid,
-      ':date'    => $date,
-      ':desc'    => $description,
-      ':type'    => $type,
-      ':cat'     => $category,
-      ':amount'  => $amount,
-      ':goal_id' => $goalId ?: null
+      ':expense_kind'   => $expenseKind,
+      ':payment_method' => $paymentMethod,
+      ':installments'      => $installments,
+      ':installment_value' => $installmentValue
    ]);
+   $transactionId = $id;
+}
+
+/* REGRA DO CRÉDITO (ANTES DO INSERT) */
+if ($paymentMethod === 'credito') {
+   $installments = (int)($installments ?? 0);
+
+   if ($installments > 1) {
+      // calcula SEMPRE no backend
+      $installmentValue = round($amount / $installments, 2);
+   } else {
+      $installmentValue = null;
+      $installments = null;
+   }
+} else {
+   $installments = null;
+   $installmentValue = null;
+}
+
+/* INSERT */
+$stmt = $pdo->prepare("
+   INSERT INTO transactions
+   (user_id, date, description, type, category, amount, goal_id,
+    expense_kind, payment_method, installments, installment_value)
+   VALUES
+   (:uid, :date, :desc, :type, :cat, :amount, :goal_id,
+    :expense_kind, :payment_method, :installments, :installment_value)
+");
+
+$stmt->execute([
+   ':uid'     => $uid,
+   ':date'    => $date,
+   ':desc'    => $description,
+   ':type'    => $type,
+   ':cat'     => $category,
+   ':amount'  => $amount,
+   ':goal_id' => $goalId ?: null,
+   ':expense_kind'   => $expenseKind,
+   ':payment_method' => $paymentMethod,
+   ':installments'      => $installments,
+   ':installment_value' => $installmentValue
+]);
+
+$transactionId = $pdo->lastInsertId();
+
+/* PARCELAS CRÉDITO (SOMENTE SE VÁLIDO) */
+if (
+   $paymentMethod === 'credito'
+   && $installments > 1
+   && $installmentValue !== null
+) {
+
+   for ($i = 1; $i <= $installments; $i++) {
+      $stmt = $pdo->prepare("
+         INSERT INTO installments
+         (user_id, transaction_id, description,
+          installment_number, total_installments, amount)
+         VALUES
+         (:uid, :tid, :desc, :num, :total, :amount)
+      ");
+
+      $stmt->execute([
+         ':uid'    => $uid,
+         ':tid'    => $transactionId,
+         ':desc'   => $description,
+         ':num'    => $i,
+         ':total'  => $installments,
+         ':amount' => $installmentValue
+      ]);
+   }
 }
 
 header('Location: index.php?route=transactions');

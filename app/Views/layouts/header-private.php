@@ -79,6 +79,11 @@
                </a>
             </li>
 
+            <li class="nav-item">
+               <a class="nav-link text-dark" href="index.php?route=installments">
+                  <i class="fa fa-credit-card me-2"></i> Parcelas
+               </a>
+            </li>
          </ul>
       </div>
    </div>
